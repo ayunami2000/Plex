@@ -11,7 +11,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 @CommandParameters(name = "opall", description = "Op everyone on the server", aliases = "opa")
-@CommandPermissions(level = Rank.ADMIN)
+@CommandPermissions(level = Rank.NONOP)
 public class OpAllCMD extends PlexCommand
 {
     @Override

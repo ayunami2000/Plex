@@ -23,7 +23,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
-@CommandPermissions(level = Rank.SENIOR_ADMIN, source = RequiredCommandSource.ANY)
+@CommandPermissions(level = Rank.OP, source = RequiredCommandSource.ANY)
 @CommandParameters(name = "admin", usage = "/<command> <add | remove | setrank | list> [player] [rank]", aliases = "saconfig,slconfig,adminconfig,adminmanage", description = "Manage all admins")
 public class AdminCMD extends PlexCommand
 {
@@ -44,10 +44,10 @@ public class AdminCMD extends PlexCommand
                 return usage("/admin add <player>");
             }
 
-            if (!isConsole(sender))
+            /*if (!isConsole(sender))
             {
                 throw new ConsoleOnlyException();
-            }
+            }*/
 
             UUID targetUUID = PlexUtils.getFromName(args[1]);
 
@@ -74,10 +74,10 @@ public class AdminCMD extends PlexCommand
                 return usage("/admin remove <player>");
             }
 
-            if (!isConsole(sender))
+            /*if (!isConsole(sender))
             {
                 throw new ConsoleOnlyException();
-            }
+            }*/
 
             UUID targetUUID = PlexUtils.getFromName(args[1]);
 
@@ -105,10 +105,10 @@ public class AdminCMD extends PlexCommand
                 return usage("/admin setrank <player> <rank>");
             }
 
-            if (!isConsole(sender))
+            /*if (!isConsole(sender))
             {
                 throw new ConsoleOnlyException();
-            }
+            }*/
 
             UUID targetUUID = PlexUtils.getFromName(args[1]);
 
