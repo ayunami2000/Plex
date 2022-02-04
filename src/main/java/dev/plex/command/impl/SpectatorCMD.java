@@ -15,26 +15,26 @@ import org.bukkit.GameMode;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @CommandPermissions(level = Rank.ADMIN, permission = "plex.gamemode.spectator", source = RequiredCommandSource.ANY)
 @CommandParameters(name = "spectator", aliases = "gmsp", description = "Set your own or another player's gamemode to spectator mode")
 public class SpectatorCMD extends PlexCommand
 {
     @Override
-    public Component execute(CommandSender sender, String[] args)
+    protected Component execute(@NotNull CommandSender sender, @Nullable Player playerSender, String[] args)
     {
-        Player player = (Player)sender;
         if (args.length == 0)
         {
             if (isConsole(sender))
             {
                 throw new CommandFailException("You must define a player when using the console!");
             }
-            player.setGameMode(GameMode.SPECTATOR);
+            playerSender.setGameMode(GameMode.SPECTATOR);
             return tl("gameModeSetTo", "spectator");
         }
 
-        if (checkRank(player, Rank.ADMIN, "plex.gamemode.spectator.others"))
+        if (checkRank(playerSender, Rank.ADMIN, "plex.gamemode.spectator.others"))
         {
             if (args[0].equals("-a"))
             {

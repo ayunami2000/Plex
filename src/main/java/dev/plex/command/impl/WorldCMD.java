@@ -16,21 +16,21 @@ import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @CommandPermissions(level = Rank.OP, permission = "plex.world", source = RequiredCommandSource.IN_GAME)
 @CommandParameters(name = "world", description = "Teleport to a world.", usage = "/<command> <world>")
 public class WorldCMD extends PlexCommand
 {
-
     @Override
-    public Component execute(CommandSender sender, String[] args)
+    protected Component execute(@NotNull CommandSender sender, @Nullable Player playerSender, String[] args)
     {
         if (args.length != 1)
         {
             throw new CommandArgumentException();
         }
         World world = getNonNullWorld(args[0]);
-        ((Player)sender).teleportAsync(new Location(world, 0, world.getHighestBlockYAt(0, 0) + 1, 0, 0, 0));
+        playerSender.teleportAsync(new Location(world, 0, world.getHighestBlockYAt(0, 0) + 1, 0, 0, 0));
         return tl("playerWorldTeleport", world.getName());
     }
 
@@ -43,5 +43,4 @@ public class WorldCMD extends PlexCommand
         }
         return ImmutableList.of();
     }
-
 }

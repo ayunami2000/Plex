@@ -15,26 +15,26 @@ import org.bukkit.GameMode;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @CommandPermissions(level = Rank.OP, permission = "plex.gamemode.survival", source = RequiredCommandSource.ANY)
 @CommandParameters(name = "survival", aliases = "gms", description = "Set your own or another player's gamemode to survival mode")
 public class SurvivalCMD extends PlexCommand
 {
     @Override
-    public Component execute(CommandSender sender, String[] args)
+    protected Component execute(@NotNull CommandSender sender, @Nullable Player playerSender, String[] args)
     {
-        Player player = (Player)sender;
         if (args.length == 0)
         {
             if (isConsole(sender))
             {
                 throw new CommandFailException("You must define a player when using the console!");
             }
-            player.setGameMode(GameMode.SURVIVAL);
+            playerSender.setGameMode(GameMode.SURVIVAL);
             return tl("gameModeSetTo", "survival");
         }
 
-        if (checkRank(player, Rank.ADMIN, "plex.gamemode.survival.others"))
+        if (checkRank(playerSender, Rank.ADMIN, "plex.gamemode.survival.others"))
         {
             if (args[0].equals("-a"))
             {

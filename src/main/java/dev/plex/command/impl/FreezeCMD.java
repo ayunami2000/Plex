@@ -11,21 +11,22 @@ import dev.plex.punishment.Punishment;
 import dev.plex.punishment.PunishmentType;
 import dev.plex.rank.enums.Rank;
 import dev.plex.util.PlexUtils;
-import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
+import org.apache.commons.lang.time.DateUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @CommandParameters(name = "freeze", description = "Freeze a player on the server", usage = "/<command> <player>")
 @CommandPermissions(level = Rank.ADMIN, permission = "plex.freeze")
 public class FreezeCMD extends PlexCommand
 {
     @Override
-    public Component execute(CommandSender sender, String[] args)
+    protected Component execute(@NotNull CommandSender sender, @Nullable Player playerSender, String[] args)
     {
         if (args.length != 1)
         {
@@ -35,7 +36,8 @@ public class FreezeCMD extends PlexCommand
         PunishedPlayer punishedPlayer = PlayerCache.getPunishedPlayer(player.getUniqueId());
         Punishment punishment = new Punishment(UUID.fromString(punishedPlayer.getUuid()), getUUID(sender));
         punishment.setCustomTime(false);
-        punishment.setEndDate(new Date(Instant.now().plusSeconds(10).toEpochMilli()));
+        Date date = new Date();
+        punishment.setEndDate(DateUtils.addDays(date, 1));
         punishment.setType(PunishmentType.FREEZE);
         punishment.setPunishedUsername(player.getName());
         punishment.setReason("");

@@ -3,28 +3,22 @@ package dev.plex.command.impl;
 import dev.plex.command.PlexCommand;
 import dev.plex.command.annotation.CommandParameters;
 import dev.plex.command.annotation.CommandPermissions;
+import dev.plex.command.source.RequiredCommandSource;
 import dev.plex.rank.enums.Rank;
-import dev.plex.util.PlexUtils;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-@CommandParameters(name = "deopall", description = "Deop everyone on the server", aliases = "deopa")
-@CommandPermissions(level = Rank.ADMIN)
-public class DeopAllCMD extends PlexCommand
+@CommandParameters(name = "localspawn", description = "Teleport to the spawnpoint of the world you are in")
+@CommandPermissions(level = Rank.OP, permission = "plex.spawnpoint", source = RequiredCommandSource.IN_GAME)
+public class LocalSpawnCMD extends PlexCommand
 {
     @Override
     protected Component execute(@NotNull CommandSender sender, @Nullable Player playerSender, String[] args)
     {
-        for (Player player : Bukkit.getOnlinePlayers())
-        {
-            player.setOp(false);
-        }
-        PlexUtils.broadcast(tl("deoppedAllPlayers", sender.getName()));
-        return null;
+        playerSender.teleportAsync(playerSender.getWorld().getSpawnLocation());
+        return tl("teleportedToWorldSpawn");
     }
-
 }

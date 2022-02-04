@@ -15,26 +15,26 @@ import org.bukkit.GameMode;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @CommandPermissions(level = Rank.OP, permission = "plex.gamemode.creative", source = RequiredCommandSource.ANY)
 @CommandParameters(name = "creative", aliases = "gmc", description = "Set your own or another player's gamemode to creative mode")
 public class CreativeCMD extends PlexCommand
 {
     @Override
-    public Component execute(CommandSender sender, String[] args)
+    protected Component execute(@NotNull CommandSender sender, @Nullable Player playerSender, String[] args)
     {
-        Player player = (Player)sender;
         if (args.length == 0)
         {
             if (isConsole(sender))
             {
                 throw new CommandFailException("You must define a player when using the console!");
             }
-            player.setGameMode(GameMode.CREATIVE);
+            playerSender.setGameMode(GameMode.CREATIVE);
             return tl("gameModeSetTo", "creative");
         }
 
-        if (checkRank(player, Rank.ADMIN, "plex.gamemode.creative.others"))
+        if (checkRank(playerSender, Rank.ADMIN, "plex.gamemode.creative.others"))
         {
             if (args[0].equals("-a"))
             {
