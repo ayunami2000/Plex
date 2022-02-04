@@ -27,6 +27,7 @@ public class PlexCMD extends PlexCommand
         if (args.length == 0)
         {
             send(sender, ChatColor.LIGHT_PURPLE + "Plex. The long awaited TotalFreedomMod rewrite starts here...");
+            send(sender, ChatColor.LIGHT_PURPLE + "This is a demo version of Plex. Anyone can add themselves to admin and players are automatically unbanned.");
             return componentFromString(ChatColor.LIGHT_PURPLE + "Plugin version: " + ChatColor.GOLD + "1.0");
         }
         if (args[0].equalsIgnoreCase("reload"))
