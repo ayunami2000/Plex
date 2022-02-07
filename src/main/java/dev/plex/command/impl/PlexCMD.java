@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @CommandPermissions(level = Rank.OP, permission = "plex.plex", source = RequiredCommandSource.ANY)
-@CommandParameters(name = "plex", usage = "/<command> [reload | redis]", aliases = "plexhelp", description = "Show information about Plex or reload it")
+@CommandParameters(name = "plex", usage = "/<command> [reload]", aliases = "plexhelp", description = "Show information about Plex or reload it")
 public class PlexCMD extends PlexCommand
 {
     @Override
@@ -38,18 +38,6 @@ public class PlexCMD extends PlexCommand
             Plex.get().getRankManager().importDefaultRanks();
             send(sender, "Imported ranks");
             send(sender, "Plex successfully reloaded.");
-        }
-        else if (args[0].equalsIgnoreCase("redis"))
-        {
-            checkRank(sender, Rank.SENIOR_ADMIN, "plex.redis");
-            if (!plugin.getRedisConnection().isEnabled())
-            {
-                throw new CommandFailException("&cRedis is not enabled.");
-            }
-            plugin.getRedisConnection().getJedis().set("test", "123");
-            send(sender, "Set test to 123. Now outputting key test...");
-            send(sender, plugin.getRedisConnection().getJedis().get("test"));
-            plugin.getRedisConnection().getJedis().close();
         }
         else
         {
