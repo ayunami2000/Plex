@@ -4,7 +4,6 @@ import dev.plex.command.PlexCommand;
 import dev.plex.command.annotation.CommandParameters;
 import dev.plex.command.annotation.CommandPermissions;
 import dev.plex.command.source.RequiredCommandSource;
-import dev.plex.player.PlexPlayer;
 import dev.plex.rank.enums.Rank;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
@@ -21,8 +20,11 @@ public class RankCMD extends PlexCommand
     @Override
     protected Component execute(@NotNull CommandSender sender, @Nullable Player playerSender, String[] args)
     {
-        PlexPlayer plexPlayer = getPlexPlayer(playerSender);
-        Rank rank = plugin.getRankManager().getRankFromString(plexPlayer.getRank());
-        return tl("yourRank", rank.getReadableString());
+        if (!(playerSender == null))
+        {
+            Rank rank = getPlexPlayer(playerSender).getRankFromString();
+            return tl("yourRank", rank.getReadableString());
+        }
+        return null;
     }
 }

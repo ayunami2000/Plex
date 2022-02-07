@@ -15,12 +15,11 @@ import dev.plex.punishment.PunishmentType;
 import dev.plex.rank.enums.Rank;
 import dev.plex.util.PlexLog;
 import dev.plex.util.PlexUtils;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.time.DateUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -75,8 +74,8 @@ public class BanCMD extends PlexCommand
             punishment.setReason("No reason provided.");
         }
         punishment.setPunishedUsername(plexPlayer.getName());
-        Date date = new Date();
-        punishment.setEndDate(DateUtils.addDays(date, 1));
+        LocalDateTime date = LocalDateTime.now();
+        punishment.setEndDate(date.plusDays(1));
         punishment.setCustomTime(false);
         plugin.getPunishmentManager().doPunishment(punishedPlayer, punishment);
         PlexUtils.broadcast(tl("banningPlayer", sender.getName(), plexPlayer.getName()));

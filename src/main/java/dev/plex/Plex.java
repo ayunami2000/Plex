@@ -70,13 +70,6 @@ public class Plex extends JavaPlugin
         sqlConnection = new SQLConnection();
         mongoConnection = new MongoConnection();
         redisConnection = new RedisConnection();
-        /*try {
-            redisConnection.openPool();
-            PlexLog.log("Successfully opened redis pool. Closing.");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        redisConnection.getJedis().close();*/
     }
 
     @Override
@@ -103,7 +96,8 @@ public class Plex extends JavaPlugin
 
         if (redisConnection.isEnabled())
         {
-            redisConnection.openPool();
+            redisConnection.getJedis();
+            PlexLog.log("Connected to Redis!");
         }
         else
         {

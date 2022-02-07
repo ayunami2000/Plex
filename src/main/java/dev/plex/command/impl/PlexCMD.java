@@ -5,7 +5,6 @@ import dev.plex.Plex;
 import dev.plex.command.PlexCommand;
 import dev.plex.command.annotation.CommandParameters;
 import dev.plex.command.annotation.CommandPermissions;
-import dev.plex.command.exception.CommandArgumentException;
 import dev.plex.command.exception.CommandFailException;
 import dev.plex.command.source.RequiredCommandSource;
 import dev.plex.rank.enums.Rank;
@@ -18,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @CommandPermissions(level = Rank.OP, permission = "plex.plex", source = RequiredCommandSource.ANY)
-@CommandParameters(name = "plex", usage = "/<command> [reload]", aliases = "plexhelp", description = "Show information about Plex or reload it")
+@CommandParameters(name = "plex", usage = "/<command> [reload | redis]", aliases = "plexhelp", description = "Show information about Plex or reload it")
 public class PlexCMD extends PlexCommand
 {
     @Override
@@ -26,9 +25,8 @@ public class PlexCMD extends PlexCommand
     {
         if (args.length == 0)
         {
-            send(sender, ChatColor.LIGHT_PURPLE + "Plex. The long awaited TotalFreedomMod rewrite starts here...");
-            send(sender, ChatColor.LIGHT_PURPLE + "This is a demo version of Plex. Anyone can add themselves to admin and players are automatically unbanned.");
-            return componentFromString(ChatColor.LIGHT_PURPLE + "Plugin version: " + ChatColor.GOLD + "1.0");
+            send(sender, ChatColor.LIGHT_PURPLE + "Plex - A new freedom plugin.");
+            return componentFromString(ChatColor.LIGHT_PURPLE + "Plugin version: " + ChatColor.GOLD + plugin.getDescription().getVersion());
         }
         if (args[0].equalsIgnoreCase("reload"))
         {
@@ -51,10 +49,11 @@ public class PlexCMD extends PlexCommand
             plugin.getRedisConnection().getJedis().set("test", "123");
             send(sender, "Set test to 123. Now outputting key test...");
             send(sender, plugin.getRedisConnection().getJedis().get("test"));
+            plugin.getRedisConnection().getJedis().close();
         }
         else
         {
-            throw new CommandArgumentException();
+            return usage(getUsage());
         }
         return null;
     }

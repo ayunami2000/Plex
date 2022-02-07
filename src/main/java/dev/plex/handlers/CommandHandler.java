@@ -24,6 +24,7 @@ public class CommandHandler extends PlexBase
         commands.add(new AdminworldCMD());
         commands.add(new AdventureCMD());
         commands.add(new BanCMD());
+        commands.add(new CommandSpyCMD());
         commands.add(new CreativeCMD());
         commands.add(new FlatlandsCMD());
         commands.add(new FreezeCMD());
@@ -36,6 +37,7 @@ public class CommandHandler extends PlexBase
         commands.add(new SpectatorCMD());
         commands.add(new SurvivalCMD());
         commands.add(new UnbanCMD());
+        commands.add(new UnfreezeCMD());
         commands.add(new WorldCMD());
         PlexLog.log(String.format("Registered %s commands!", commands.size()));
     }

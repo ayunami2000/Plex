@@ -5,21 +5,17 @@ import com.google.common.collect.Lists;
 import dev.plex.command.PlexCommand;
 import dev.plex.command.annotation.CommandParameters;
 import dev.plex.command.annotation.CommandPermissions;
-import dev.plex.command.exception.CommandArgumentException;
 import dev.plex.rank.enums.Rank;
+import dev.plex.util.AshconInfo;
 import dev.plex.util.MojangUtils;
 import dev.plex.util.PlexLog;
 import dev.plex.util.PlexUtils;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -29,52 +25,40 @@ import org.jetbrains.annotations.Nullable;
 @CommandPermissions(level = Rank.OP, permission = "plex.namehistory")
 public class NameHistoryCMD extends PlexCommand
 {
-    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("MM/dd/yyyy 'at' HH:mm:ss");
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("MM/dd/yyyy 'at' hh:mm:ss a");
 
     @Override
     protected Component execute(@NotNull CommandSender sender, @Nullable Player playerSender, String[] args)
     {
         if (args.length != 1)
         {
-            throw new CommandArgumentException();
+            return usage(getUsage());
         }
         String username = args[0];
 
-        UUID uuid;
-        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayerIfCached(username);
-        if (offlinePlayer != null)
+        AshconInfo info = MojangUtils.getInfo(username);
+        if (info == null)
         {
-            uuid = offlinePlayer.getUniqueId();
+            return tl("nameHistoryDoesntExist");
         }
-        else
-        {
-            uuid = MojangUtils.getUUID(username);
-        }
-
-        if (uuid == null)
-        {
-            return Component.text("Couldn't find this user! Please check if your spelling was correct and this player exists").color(NamedTextColor.RED);
-        }
-        PlexLog.debug("NameHistory UUID: " + uuid);
-
-        List<Map.Entry<String, LocalDateTime>> history = MojangUtils.getNameHistory(uuid);
-        PlexLog.debug("NameHistory Size: " + history.size());
+        PlexLog.debug("NameHistory UUID: " + info.getUuid());
+        PlexLog.debug("NameHistory Size: " + info.getUsernameHistories().length);
         List<Component> historyList = Lists.newArrayList();
-        history.forEach(entry ->
+        Arrays.stream(info.getUsernameHistories()).forEach(history ->
         {
-            if (entry.getValue() != null)
+            if (history.getLocalDateTime() != null)
             {
                 historyList.add(
-                        Component.text(entry.getKey()).color(NamedTextColor.GOLD)
+                        Component.text(history.getUsername()).color(NamedTextColor.GOLD)
                                 .append(Component.space())
                                 .append(Component.text("-").color(NamedTextColor.DARK_GRAY))
                                 .append(Component.space())
-                                .append(Component.text(DATE_FORMAT.format(entry.getValue())).color(NamedTextColor.GOLD)));
+                                .append(Component.text(DATE_FORMAT.format(history.getLocalDateTime())).color(NamedTextColor.GOLD)));
             }
             else
             {
                 historyList.add(
-                        Component.text(entry.getKey()).color(NamedTextColor.GOLD)
+                        Component.text(history.getUsername()).color(NamedTextColor.GOLD)
                                 .append(Component.space()));
             }
         });

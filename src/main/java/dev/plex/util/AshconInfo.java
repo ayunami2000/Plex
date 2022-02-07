@@ -1,0 +1,49 @@
+package dev.plex.util;
+
+import com.google.gson.annotations.SerializedName;
+import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class AshconInfo
+{
+    private String uuid;
+    private String username;
+
+    @SerializedName("username_history")
+    private UsernameHistory[] usernameHistories;
+
+    private Textures textures;
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class UsernameHistory
+    {
+        private String username;
+        @SerializedName("changed_at")
+        private LocalDateTime localDateTime;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class Textures
+    {
+        private boolean custom;
+        private boolean slim;
+        private SkinData raw;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class SkinData
+    {
+        private String value;
+        private String signature;
+    }
+}

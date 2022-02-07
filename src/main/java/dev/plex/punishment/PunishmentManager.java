@@ -13,11 +13,11 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -41,6 +41,7 @@ public class PunishmentManager extends PlexBase
                 {
                     plugin.getRedisConnection().getJedis().set(player.getUuid(), object.toString());
                     PlexLog.debug("Added " + player.getUuid() + "'s punishment to the Redis database.");
+                    plugin.getRedisConnection().getJedis().close();
                 }
 
                 FileWriter writer = new FileWriter(file);
@@ -62,6 +63,7 @@ public class PunishmentManager extends PlexBase
                 {
                     plugin.getRedisConnection().getJedis().set(player.getUuid(), object.toString());
                     PlexLog.debug("Added " + player.getUuid() + "'s punishment to the Redis database.");
+                    plugin.getRedisConnection().getJedis().close();
                 }
 
                 FileWriter writer = new FileWriter(file);
@@ -99,9 +101,9 @@ public class PunishmentManager extends PlexBase
         else if (punishment.getType() == PunishmentType.FREEZE)
         {
             player.setFrozen(true);
-            Date now = new Date();
-            Date then = punishment.getEndDate();
-            long seconds = TimeUnit.MILLISECONDS.toSeconds(then.getTime() - now.getTime());
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime then = punishment.getEndDate();
+            long seconds = ChronoUnit.SECONDS.between(now, then);
             new BukkitRunnable()
             {
                 @Override
@@ -121,9 +123,9 @@ public class PunishmentManager extends PlexBase
         else if (punishment.getType() == PunishmentType.MUTE)
         {
             player.setMuted(true);
-            Date now = new Date();
-            Date then = punishment.getEndDate();
-            long seconds = TimeUnit.MILLISECONDS.toSeconds(then.getTime() - now.getTime());
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime then = punishment.getEndDate();
+            long seconds = ChronoUnit.SECONDS.between(now, then);
             new BukkitRunnable()
             {
                 @Override

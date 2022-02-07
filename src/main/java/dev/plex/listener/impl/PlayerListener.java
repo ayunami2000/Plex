@@ -32,13 +32,23 @@ public class PlayerListener extends PlexListener
 
         PlexPlayer plexPlayer;
 
+        if (plugin.getSystem().equalsIgnoreCase("ranks"))
+        {
+            player.setOp(true);
+            PlexLog.debug("Automatically opped " + player.getName() + " since ranks are enabled.");
+        }
+        else if (plugin.getSystem().equalsIgnoreCase("permissions"))
+        {
+            player.setOp(false);
+            PlexLog.debug("Automatically deopped " + player.getName() + " since ranks are disabled.");
+        }
+
         if (!DataUtils.hasPlayedBefore(player.getUniqueId()))
         {
             PlexLog.log("A player with this name has not joined the server before, creating new entry.");
             plexPlayer = new PlexPlayer(player.getUniqueId()); //it doesn't! okay so now create the object
             plexPlayer.setName(player.getName()); //set the name of the player
             plexPlayer.setIps(Collections.singletonList(player.getAddress().getAddress().getHostAddress().trim())); //set the arraylist of ips
-
             DataUtils.insert(plexPlayer); // insert data in some wack db
         }
         else
@@ -47,7 +57,10 @@ public class PlayerListener extends PlexListener
         }
 
         PlayerCache.getPlexPlayerMap().put(player.getUniqueId(), plexPlayer); //put them into the cache
-        PlayerCache.getPunishedPlayerMap().put(player.getUniqueId(), new PunishedPlayer(player.getUniqueId()));
+        if (!PlayerCache.getPunishedPlayerMap().containsKey(player.getUniqueId()))
+        {
+            PlayerCache.getPunishedPlayerMap().put(player.getUniqueId(), new PunishedPlayer(player.getUniqueId()));
+        }
 
         assert plexPlayer != null;
 
@@ -90,6 +103,5 @@ public class PlayerListener extends PlexListener
         }
 
         PlayerCache.getPlexPlayerMap().remove(event.getPlayer().getUniqueId()); //remove them from cache
-        PlayerCache.getPunishedPlayerMap().remove(event.getPlayer().getUniqueId());
     }
 }

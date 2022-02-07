@@ -5,7 +5,6 @@ import dev.plex.cache.DataUtils;
 import dev.plex.cache.PlayerCache;
 import dev.plex.command.annotation.CommandParameters;
 import dev.plex.command.annotation.CommandPermissions;
-import dev.plex.command.exception.CommandArgumentException;
 import dev.plex.command.exception.CommandFailException;
 import dev.plex.command.exception.ConsoleMustDefinePlayerException;
 import dev.plex.command.exception.ConsoleOnlyException;
@@ -30,20 +29,42 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.PluginIdentifiableCommand;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Superclass for all commands
+ */
 public abstract class PlexCommand extends Command implements PluginIdentifiableCommand
 {
+    /**
+     * Returns the instance of the plugin
+     */
     protected static Plex plugin = Plex.get();
 
+    /**
+     * The parameters for the command
+     */
     private final CommandParameters params;
+
+    /**
+     * The permissions for the command
+     */
     private final CommandPermissions perms;
 
+    /**
+     * Minimum required rank fetched from the permissions
+     */
     private final Rank level;
+
+    /**
+     * Required command source fetched from the permissions
+     */
     private final RequiredCommandSource commandSource;
 
+    /**
+     * Creates an instance of the command
+     */
     public PlexCommand()
     {
         super("");
@@ -64,9 +85,20 @@ public abstract class PlexCommand extends Command implements PluginIdentifiableC
         getMap().register("plex", this);
     }
 
+    /**
+     * Executes the command
+     *
+     * @param sender       The sender of the command
+     * @param playerSender The player who executed the command (null if command source is console or if command source is any but console executed)
+     * @param args         A Kyori Component to send to the sender (can be null)
+     * @return
+     */
     protected abstract Component execute(@NotNull CommandSender sender, @Nullable Player playerSender, @NotNull String[] args);
 
 
+    /**
+     * @hidden
+     */
     @Override
     public boolean execute(@NotNull CommandSender sender, @NotNull String label, String[] args)
     {
@@ -114,6 +146,37 @@ public abstract class PlexCommand extends Command implements PluginIdentifiableC
                 return true;
             }
         }
+
+        if (commandSource == RequiredCommandSource.ANY)
+        {
+            if (sender instanceof Player player)
+            {
+                PlexPlayer plexPlayer = PlayerCache.getPlexPlayerMap().get(player.getUniqueId());
+
+                if (plugin.getSystem().equalsIgnoreCase("ranks"))
+                {
+                    if (!plexPlayer.getRankFromString().isAtLeast(getLevel()))
+                    {
+                        send(sender, tl("noPermissionRank", ChatColor.stripColor(getLevel().getLoginMSG())));
+                        return true;
+                    }
+                }
+                else if (plugin.getSystem().equalsIgnoreCase("permissions"))
+                {
+                    if (!player.hasPermission(perms.permission()))
+                    {
+                        send(sender, tl("noPermissionNode", perms.permission()));
+                        return true;
+                    }
+                }
+                else
+                {
+                    PlexLog.error("Neither permissions or ranks were selected to be used in the configuration file!");
+                    send(sender, "There is a server misconfiguration. Please alert a developer or the owner");
+                    return true;
+                }
+            }
+        }
         try
         {
             Component component = this.execute(sender, isConsole(sender) ? null : (Player)sender, args);
@@ -121,10 +184,6 @@ public abstract class PlexCommand extends Command implements PluginIdentifiableC
             {
                 send(sender, component);
             }
-        }
-        catch (CommandArgumentException ex)
-        {
-            send(sender, getUsage().replace("<command>", getLabel()));
         }
         catch (PlayerNotFoundException | CommandFailException
                 | ConsoleOnlyException | ConsoleMustDefinePlayerException
@@ -136,6 +195,12 @@ public abstract class PlexCommand extends Command implements PluginIdentifiableC
     }
 
 
+    /**
+     * Checks if the string given is a command string
+     *
+     * @param label The string to check
+     * @return true if the string is a command name or alias
+     */
     private boolean matches(String label)
     {
         if (params.aliases().split(",").length > 0)
@@ -155,31 +220,68 @@ public abstract class PlexCommand extends Command implements PluginIdentifiableC
         return false;
     }
 
+    /**
+     * Gets a PlexPlayer from Player object
+     *
+     * @param player The player object
+     * @return PlexPlayer Object
+     * @see PlexPlayer
+     */
     protected PlexPlayer getPlexPlayer(@NotNull Player player)
     {
         return DataUtils.getPlayer(player.getUniqueId());
     }
 
+    /**
+     * Sends a message to an audience
+     *
+     * @param audience The audience to send the message to
+     * @param s        The message to send
+     */
     protected void send(Audience audience, String s)
     {
         audience.sendMessage(componentFromString(s));
     }
 
+    /**
+     * Sends a message to an audience
+     *
+     * @param audience  The audience to send the message to
+     * @param component The component to send
+     */
     protected void send(Audience audience, Component component)
     {
         audience.sendMessage(component);
     }
 
+    /**
+     * Checks whether a sender has enough permissions or is high enough a rank
+     *
+     * @param sender     A command sender
+     * @param rank       The rank to check (if the server is using ranks)
+     * @param permission The permission to check (if the server is using permissions)
+     * @return true if the sender has enough permissions
+     * @see Rank
+     */
     protected boolean checkRank(CommandSender sender, Rank rank, String permission)
     {
         if (!isConsole(sender))
         {
-            checkRank((Player)sender, rank, permission);
-            return true;
+            return checkRank((Player)sender, rank, permission);
+//            return true;
         }
         return true;
     }
 
+    /**
+     * Checks whether a player has enough permissions or is high enough a rank
+     *
+     * @param player     The player object
+     * @param rank       The rank to check (if the server is using ranks)
+     * @param permission The permission to check (if the server is using permissions)
+     * @return true if the sender has enough permissions
+     * @see Rank
+     */
     protected boolean checkRank(Player player, Rank rank, String permission)
     {
         PlexPlayer plexPlayer = getPlexPlayer(player);
@@ -200,11 +302,24 @@ public abstract class PlexCommand extends Command implements PluginIdentifiableC
         return true;
     }
 
+    /**
+     * Checks if a player is an admin
+     *
+     * @param plexPlayer The PlexPlayer object
+     * @return true if the player is an admin
+     * @see PlexPlayer
+     */
     protected boolean isAdmin(PlexPlayer plexPlayer)
     {
         return Plex.get().getRankManager().isAdmin(plexPlayer);
     }
 
+    /**
+     * Checks if a sender is an admin
+     *
+     * @param sender A command sender
+     * @return true if the sender is an admin or if console
+     */
     protected boolean isAdmin(CommandSender sender)
     {
         if (!(sender instanceof Player player))
@@ -215,12 +330,24 @@ public abstract class PlexCommand extends Command implements PluginIdentifiableC
         return plugin.getRankManager().isAdmin(plexPlayer);
     }
 
+    /**
+     * Checks if a username is an admin
+     *
+     * @param name The username
+     * @return true if the username is an admin
+     */
     protected boolean isAdmin(String name)
     {
         PlexPlayer plexPlayer = DataUtils.getPlayer(name);
         return plugin.getRankManager().isAdmin(plexPlayer);
     }
 
+    /**
+     * Checks if a sender is a senior admin
+     *
+     * @param sender A command sender
+     * @return true if the sender is a senior admin or if console
+     */
     protected boolean isSeniorAdmin(CommandSender sender)
     {
         if (!(sender instanceof Player player))
@@ -231,6 +358,13 @@ public abstract class PlexCommand extends Command implements PluginIdentifiableC
         return plugin.getRankManager().isSeniorAdmin(plexPlayer);
     }
 
+    /**
+     * Gets the UUID of the sender
+     *
+     * @param sender A command sender
+     * @return A unique ID or null if the sender is console
+     * @see UUID
+     */
     protected UUID getUUID(CommandSender sender)
     {
         if (!(sender instanceof Player player))
@@ -240,23 +374,47 @@ public abstract class PlexCommand extends Command implements PluginIdentifiableC
         return player.getUniqueId();
     }
 
+    /**
+     * The plugin
+     *
+     * @return The instance of the plugin
+     * @see Plex
+     */
     @Override
-    public @NotNull Plugin getPlugin()
+    public @NotNull Plex getPlugin()
     {
         return plugin;
     }
 
-
+    /**
+     * Checks whether a sender is console
+     *
+     * @param sender A command sender
+     * @return true if the sender is console
+     */
     protected boolean isConsole(CommandSender sender)
     {
         return !(sender instanceof Player);
     }
 
+    /**
+     * Converts a message entry from the "messages.yml" to a component
+     *
+     * @param s       The message entry
+     * @param objects Any objects to replace in order
+     * @return A kyori component
+     */
     protected Component tl(String s, Object... objects)
     {
         return componentFromString(PlexUtils.tl(s, objects));
     }
 
+    /**
+     * Converts usage to a component
+     *
+     * @param s The usage to convert
+     * @return A kyori component stating the usage
+     */
     protected Component usage(String s)
     {
         return componentFromString(ChatColor.YELLOW + "Correct Usage: " + ChatColor.GRAY + s);
@@ -303,6 +461,12 @@ public abstract class PlexCommand extends Command implements PluginIdentifiableC
         return world;
     }
 
+    /**
+     * Converts a string to a legacy kyori component
+     *
+     * @param s The string to convert
+     * @return A kyori component
+     */
     protected Component componentFromString(String s)
     {
         return LegacyComponentSerializer.legacyAmpersand().deserialize(s);

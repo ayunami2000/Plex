@@ -1,9 +1,12 @@
 package dev.plex.command.impl;
 
 import com.google.common.collect.ImmutableList;
+import dev.plex.cache.PlayerCache;
 import dev.plex.command.PlexCommand;
 import dev.plex.command.annotation.CommandParameters;
 import dev.plex.command.annotation.CommandPermissions;
+import dev.plex.command.exception.CommandFailException;
+import dev.plex.player.PunishedPlayer;
 import dev.plex.rank.enums.Rank;
 import dev.plex.util.PlexUtils;
 import java.util.List;
@@ -13,9 +16,9 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-@CommandParameters(name = "deop", description = "Deop a player on the server", usage = "/<command> <player>")
-@CommandPermissions(level = Rank.ADMIN, permission = "plex.deop")
-public class DeopCMD extends PlexCommand
+@CommandPermissions(level = Rank.ADMIN, permission = "plex.unfreeze")
+@CommandParameters(name = "unfreeze", description = "Unfreeze a player", usage = "/<command> <player>")
+public class UnfreezeCMD extends PlexCommand
 {
     @Override
     protected Component execute(@NotNull CommandSender sender, @Nullable Player playerSender, String[] args)
@@ -25,14 +28,18 @@ public class DeopCMD extends PlexCommand
             return usage(getUsage());
         }
         Player player = getNonNullPlayer(args[0]);
-        player.setOp(false);
-        PlexUtils.broadcast(tl("oppedPlayer", sender.getName(), player.getName()));
-        return null;
+        PunishedPlayer punishedPlayer = PlayerCache.getPunishedPlayer(player.getUniqueId());
+        if (!punishedPlayer.isFrozen())
+        {
+            throw new CommandFailException(PlexUtils.tl("playerNotFrozen"));
+        }
+        punishedPlayer.setFrozen(false);
+        return tl("unfrozePlayer", sender.getName(), player.getName());
     }
 
     @Override
     public @NotNull List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args) throws IllegalArgumentException
     {
-        return args.length == 1 ? PlexUtils.getPlayerNameList() : ImmutableList.of();
+        return args.length == 1 && isAdmin(sender) ? PlexUtils.getPlayerNameList() : ImmutableList.of();
     }
 }
